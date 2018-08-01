@@ -1,0 +1,62 @@
+buildscript {
+    repositories { jcenter() }
+}
+
+allprojects {
+    task wrapper(type: Wrapper) {
+        gradleVersion = '4.4'
+        distributionType = Wrapper.DistributionType.ALL
+    }
+}
+
+group = 'com.dynamodb'
+version = '1.0.1'
+
+apply plugin: 'java'
+apply plugin: 'maven'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+apply from: "$rootDir/libs.gradle"
+
+repositories {
+    mavenCentral()
+    jcenter()
+    maven { url 'http://dynamodb-local.s3-website-us-west-2.amazonaws.com/release' }
+    flatDir {
+        dirs "$rootDir/lib"
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+dependencies {
+    compile libs.apache_commons_lang3
+    compile libs.google_guava
+    compile libs.aws_dynamoDbSdk
+    compile libs.logging_slf4j
+
+    testCompile libs.test_dynamoDbLocal
+    testCompile libs.test_festAssert
+    testCompile libs.test_testng
+    testCompile libs.test_unitilsCore
+}
+
+test {
+    useTestNG()
+}
+
